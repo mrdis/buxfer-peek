@@ -137,7 +137,7 @@ export default function View({ authToken }) {
                     result.response.budgets = result.response.budgets.map(b=>({...b,info:getBudgetInfo(b)}))
                     //for(var i=0;i<result.response.budgets.length;i++)result.response.budgets[i].info=getBudgetInfo(result.response.budgets[i])
                     setBudgets(result.response.budgets)
-                    setSavedBudgets(budgets)
+                    setSavedBudgets(result.response.budgets)
                     setFreshData(true)
                     console.log(result)
                     //for(var b of budgets)console.log(getBudgetInfo(b))
@@ -167,7 +167,7 @@ export default function View({ authToken }) {
                 <TableBody>
                     {budgets.map((budget) => (budget.balance!==undefined) && (favs[budget.id])?(
                         <TableRow key={budget.budgetId}>
-                            <TableCell>
+                            <TableCell padding="none">
                                 <IconButton 
                                     color="primary"
                                     onClick={()=>removeFav(budget.budgetId,1)}
@@ -175,7 +175,7 @@ export default function View({ authToken }) {
                                     <StarIcon/>
                                 </IconButton>
                             </TableCell> 
-                            <TableCell>{budget.name}</TableCell>
+                            <TableCell padding="none">{budget.name}</TableCell>
                             <TableCell align="right">{`${budgetFormat(budget.balance)}`}</TableCell>
                             <TableCell><BudgetBar budget={budget}/></TableCell>
                             <TableCell></TableCell>
@@ -183,17 +183,17 @@ export default function View({ authToken }) {
                     ):null)}
                     {budgets.map((budget) => (budget.balance!==undefined) && !hidden[budget.id] && !favs[budget.id]?(
                         <TableRow key={budget.budgetId}>
-                            <TableCell>
+                            <TableCell padding="none">
                                 <IconButton 
                                     onClick={()=>setFav(budget.budgetId,1)}
                                 >
                                     <StarOutlineIcon/>
                                 </IconButton>
                             </TableCell>
-                            <TableCell>{budget.name}</TableCell>
+                            <TableCell padding="none">{budget.name}</TableCell>
                             <TableCell align="right">{`${budgetFormat(budget.balance)}`}</TableCell>
                             <TableCell><BudgetBar budget={budget}/></TableCell>
-                            <TableCell>
+                            <TableCell padding="none">
                                 <IconButton 
                                     onClick={()=>setHidden(budget.budgetId,1)}
                                 >
@@ -207,17 +207,17 @@ export default function View({ authToken }) {
                         <Button 
                             onClick={()=>setShowHidden(!showHidden)}
                         >
-                            Show hidden budgets
+                            {showHidden?"Hide budgets":"Show hidden budgets"}
                         </Button>
                         </TableCell>
                     </TableRow>
                     {budgets.map((budget) => showHidden && (budget.balance!==undefined) && hidden[budget.id]?(
                         <TableRow key={budget.budgetId}>
                             <TableCell></TableCell>
-                            <TableCell>{budget.name}</TableCell>
+                            <TableCell padding="none">{budget.name}</TableCell>
                             <TableCell align="right">{`${budgetFormat(budget.balance)}`}</TableCell>
                             <TableCell><BudgetBar budget={budget}/></TableCell>
-                            <TableCell>
+                            <TableCell padding="none">
                                 <IconButton 
                                     onClick={()=>removeHidden(budget.budgetId,1)}
                                 >
