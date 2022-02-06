@@ -15,6 +15,18 @@ import StarIcon from '@mui/icons-material/Star';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import * as dateMath from 'date-arithmetic'
 
+
+function StackedBar({widths,colors,height,borderRadius}){
+    if(!borderRadius)borderRadius = 10;
+    if(!height)height="20px";
+    return <div style={{height:height, display:"flex",borderRadius:borderRadius+"px",overflow:"hidden"}}>
+        {widths.map((w,i)=>(
+            <div key={i} style={{height:height,width:w,backgroundColor:colors[i],display:"flex",borderLeft:"1px solid "+colors[i]}}></div>
+        ))}
+    </div>
+}
+
+
 function getPeriodDuration(period){
     if(period=="day")return 1
     if(period=="week")return 7
@@ -32,6 +44,8 @@ function findPeriodBegin(begin,unit,size,now){
 function getBudgetInfo(budget){
     var spent = budget.spent
     var available = budget.balance
+    if(available<0)available=0
+    var total = spent + available
     var limit = budget.limit
     var duration = budget.periodSize * getPeriodDuration(budget.periodUnit)
     console.log(duration)
@@ -41,15 +55,49 @@ function getBudgetInfo(budget){
         console.log(periodBegin)
         var elapsed = (Date.now() - periodBegin)/(24*3600*1000)
         console.log(elapsed)
-        var total = spent + available
+        
         spentExpected = Math.floor(total / duration * elapsed)
     }
     return {
         spent,
         available,
         spentExpected,
-        limit
+        limit,
+        total
     }
+}
+
+
+
+function BudgetBar({budget}){
+    if(!budget.info)return null;
+    if(!budget.info.total)return null;
+    var {spent,available,spentExpected,limit,total}=budget.info
+    var vals=[],colors=[]
+    const perc = (val)=>''+(val/Math.max(total,spent)*100)+'%'
+    if(spent<=spentExpected){
+        // | spent  green | expected-spent dark green | total-expected pale green|
+        vals = [perc(spent),perc(spentExpected-spent),'0px',perc(total-spentExpected)]
+        colors = ["lightgreen","palegreen","grey","palegreen"]
+    }else if(spent<=total){
+        // | expected green | spent-expected yellow | total-spent pale green |
+        vals = [perc(spentExpected),perc(spent-spentExpected),perc(total-spent)]
+        colors = ["limegreen","orange","palegreen"]
+    }else{
+        // | expected green | total-expected yellow | spent-total red | 
+        vals = [perc(spentExpected),perc(total-spentExpected),perc(spent-total)]
+        colors = ["limegreen","orange","red"]
+    }
+    return <div style={{position:"relative",textAlign:"center"}}>
+        <div style={{position:"absolute",zIndex:-1,width:"100%",height:"100%"}}>
+            <StackedBar 
+                widths={vals}
+                colors={colors}
+                height="100%"
+            />    
+        </div>
+        <div style={{paddingLeft:'10px',paddingRight:'10px'}}>{budgetFormat(spent)}/{budgetFormat(total)}</div>
+    </div>
 }
 
 
@@ -112,6 +160,7 @@ export default function View({ authToken }) {
                         <TableCell></TableCell>
                         <TableCell>Name</TableCell>
                         <TableCell align="right">Available</TableCell>
+                        <TableCell>Spent</TableCell>
                         <TableCell></TableCell>
                     </TableRow>
                 </TableHead>
@@ -128,6 +177,7 @@ export default function View({ authToken }) {
                             </TableCell> 
                             <TableCell>{budget.name}</TableCell>
                             <TableCell align="right">{`${budgetFormat(budget.balance)}`}</TableCell>
+                            <TableCell><BudgetBar budget={budget}/></TableCell>
                             <TableCell></TableCell>
                         </TableRow>
                     ):null)}
@@ -142,6 +192,7 @@ export default function View({ authToken }) {
                             </TableCell>
                             <TableCell>{budget.name}</TableCell>
                             <TableCell align="right">{`${budgetFormat(budget.balance)}`}</TableCell>
+                            <TableCell><BudgetBar budget={budget}/></TableCell>
                             <TableCell>
                                 <IconButton 
                                     onClick={()=>setHidden(budget.budgetId,1)}
@@ -165,6 +216,7 @@ export default function View({ authToken }) {
                             <TableCell></TableCell>
                             <TableCell>{budget.name}</TableCell>
                             <TableCell align="right">{`${budgetFormat(budget.balance)}`}</TableCell>
+                            <TableCell><BudgetBar budget={budget}/></TableCell>
                             <TableCell>
                                 <IconButton 
                                     onClick={()=>removeHidden(budget.budgetId,1)}
