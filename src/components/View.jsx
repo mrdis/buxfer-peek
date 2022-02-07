@@ -139,13 +139,12 @@ export default function View({ authToken }) {
             .then(res => res.json())
             .then(
                 (result) => {
-                    result.response.budgets = result.response.budgets.map(b=>({...b,info:getBudgetInfo(b)}))
-                    //for(var i=0;i<result.response.budgets.length;i++)result.response.budgets[i].info=getBudgetInfo(result.response.budgets[i])
-                    setBudgets(result.response.budgets)
-                    setSavedBudgets(result.response.budgets)
+                    var bs = result.response.budgets
+                    bs = bs.map(b=>({...b,info:getBudgetInfo(b)}))
+                    bs = bs.sort((a,b)=>a.name.localeCompare(b.name))
+                    setBudgets(bs)
+                    setSavedBudgets(bs)
                     setFreshData(true)
-                    console.log(result)
-                    //for(var b of budgets)console.log(getBudgetInfo(b))
                 },
                 (error) => {
                     console.log(error)
