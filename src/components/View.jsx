@@ -44,20 +44,21 @@ function findPeriodBegin(begin,unit,size,now){
 function getBudgetInfo(budget){
     var spent = budget.spent
     var available = budget.balance
-    if(available<0)available=0
     var total = spent + available
-    var limit = budget.limit
+    if(available<0){
+        spent+=-available
+        available=0
+    }
+    if(total<0)total=0
+    
     var duration = budget.periodSize * getPeriodDuration(budget.periodUnit)
-    console.log(duration)
     var spentExpected
     if(budget.periodUnit){
         var periodBegin = findPeriodBegin(Date.parse(budget.startDate),budget.periodUnit,budget.periodSize,Date.now())
-        console.log(periodBegin)
         var elapsed = (Date.now() - periodBegin)/(24*3600*1000)
-        console.log(elapsed)
-        
-        spentExpected = Math.floor(total / duration * elapsed)
+        spentExpected = 1.0 * total / duration * elapsed
     }
+    var limit = budget.limit
     return {
         spent,
         available,
@@ -71,18 +72,18 @@ function getBudgetInfo(budget){
 
 function BudgetBar({budget}){
     if(!budget.info)return null;
-    if(!budget.info.total)return null;
+    //if(!budget.info.total)return null;
     var {spent,available,spentExpected,limit,total}=budget.info
     var vals=[],colors=[]
-    const perc = (val)=>''+(val/Math.max(total,spent)*100)+'%'
+    const perc = (val)=>''+(1.0*val/Math.max(total,spent)*100)+'%'
     if(spent<=spentExpected){
         // | spent  green | expected-spent dark green | total-expected pale green|
         vals = [perc(spent),perc(spentExpected-spent),'0px',perc(total-spentExpected)]
-        colors = ["lightgreen","palegreen","grey","palegreen"]
+        colors = ["limegreen","palegreen","grey","palegreen"]
     }else if(spent<=total){
         // | expected green | spent-expected yellow | total-spent pale green |
-        vals = [perc(spentExpected),perc(spent-spentExpected),perc(total-spent)]
-        colors = ["limegreen","orange","palegreen"]
+        vals = [perc(spentExpected),'0px',perc(spent-spentExpected),perc(total-spent)]
+        colors = ["limegreen","grey","orange","palegreen"]
     }else{
         // | expected green | total-expected yellow | spent-total red | 
         vals = [perc(spentExpected),perc(total-spentExpected),perc(spent-total)]
@@ -96,7 +97,11 @@ function BudgetBar({budget}){
                 height="100%"
             />    
         </div>
-        <div style={{paddingLeft:'10px',paddingRight:'10px'}}>{budgetFormat(spent)}/{budgetFormat(total)}</div>
+        <div style={{paddingLeft:'10px',paddingRight:'10px'}}>
+            {budgetFormat(spent)}
+            {" / "}
+            {budgetFormat(total)}
+        </div>
     </div>
 }
 
@@ -159,7 +164,7 @@ export default function View({ authToken }) {
                     <TableRow>
                         <TableCell></TableCell>
                         <TableCell>Name</TableCell>
-                        <TableCell align="right">Available</TableCell>
+                        <TableCell align="right">Avail</TableCell>
                         <TableCell>Spent</TableCell>
                         <TableCell></TableCell>
                     </TableRow>
@@ -203,7 +208,7 @@ export default function View({ authToken }) {
                         </TableRow>
                     ):null)}
                     <TableRow>
-                        <TableCell colSpan={4}>
+                        <TableCell colSpan={5}>
                         <Button 
                             onClick={()=>setShowHidden(!showHidden)}
                         >
@@ -213,16 +218,18 @@ export default function View({ authToken }) {
                     </TableRow>
                     {budgets.map((budget) => showHidden && (budget.balance!==undefined) && hidden[budget.id]?(
                         <TableRow key={budget.budgetId}>
-                            <TableCell></TableCell>
-                            <TableCell padding="none">{budget.name}</TableCell>
-                            <TableCell align="right">{`${budgetFormat(budget.balance)}`}</TableCell>
-                            <TableCell><BudgetBar budget={budget}/></TableCell>
                             <TableCell padding="none">
                                 <IconButton 
                                     onClick={()=>removeHidden(budget.budgetId,1)}
                                 >
                                     <VisibilityIcon/>
                                 </IconButton>
+                            </TableCell>
+                            <TableCell padding="none">{budget.name}</TableCell>
+                            <TableCell align="right">{`${budgetFormat(budget.balance)}`}</TableCell>
+                            <TableCell><BudgetBar budget={budget}/></TableCell>
+                            <TableCell padding="none">
+
                             </TableCell>
                         </TableRow>
                     ):null)}

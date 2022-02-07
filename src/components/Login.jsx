@@ -13,9 +13,9 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 const theme = createTheme();
 
-export default function Login(onSuccess,onFail) {
+export default function Login({onSuccess,onFail}) {
   const [errorMessage,setErrorMessage] = React.useState("");
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
