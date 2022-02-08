@@ -13,6 +13,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import StarIcon from '@mui/icons-material/Star';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import * as dateMath from 'date-arithmetic'
 
 
@@ -134,6 +135,16 @@ export default function View({ authToken }) {
       [hidden]
     );
 
+    const [savedRemoved, setSavedRemoved] = useLocalStorage("removed", {})
+    const [removed, {set : setRemoved}] = useMap(savedRemoved)
+    React.useEffect(
+      () => {
+        setSavedRemoved(removed)
+      },
+      // This is important
+      [removed]
+    );
+
     React.useEffect(() => {
         fetch("https://www.buxfer.com/api/budgets?token=" + authToken)
             .then(res => res.json())
@@ -185,7 +196,7 @@ export default function View({ authToken }) {
                             <TableCell></TableCell>
                         </TableRow>
                     ):null)}
-                    {budgets.map((budget) => (budget.balance!==undefined) && !hidden[budget.id] && !favs[budget.id]?(
+                    {budgets.map((budget) => (budget.balance!==undefined) && !hidden[budget.id] && !removed[budget.id] && !favs[budget.id]?(
                         <TableRow key={budget.budgetId}>
                             <TableCell padding="none">
                                 <IconButton 
@@ -215,11 +226,11 @@ export default function View({ authToken }) {
                         </Button>
                         </TableCell>
                     </TableRow>
-                    {budgets.map((budget) => showHidden && (budget.balance!==undefined) && hidden[budget.id]?(
+                    {budgets.map((budget) => showHidden && (budget.balance!==undefined) && hidden[budget.id]  && !removed[budget.id]?(
                         <TableRow key={budget.budgetId}>
                             <TableCell padding="none">
                                 <IconButton 
-                                    onClick={()=>removeHidden(budget.budgetId,1)}
+                                    onClick={()=>removeHidden(budget.budgetId)}
                                 >
                                     <VisibilityIcon/>
                                 </IconButton>
@@ -228,7 +239,11 @@ export default function View({ authToken }) {
                             <TableCell align="right">{`${budgetFormat(budget.balance)}`}</TableCell>
                             <TableCell><BudgetBar budget={budget}/></TableCell>
                             <TableCell padding="none">
-
+                                <IconButton 
+                                    onClick={()=>{setRemoved(budget.budgetId,1)}}
+                                >
+                                    <RemoveCircleOutlineIcon/>
+                                </IconButton>
                             </TableCell>
                         </TableRow>
                     ):null)}
