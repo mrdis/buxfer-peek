@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/buxfer-peek/static/css/main.073c9b0a.css",
+    "main.js": "/buxfer-peek/static/js/main.ef1eacfe.js",
+    "static/js/787.b2bf7ae4.chunk.js": "/buxfer-peek/static/js/787.b2bf7ae4.chunk.js",
+    "index.html": "/buxfer-peek/index.html",
+    "main.073c9b0a.css.map": "/buxfer-peek/static/css/main.073c9b0a.css.map",
+    "main.ef1eacfe.js.map": "/buxfer-peek/static/js/main.ef1eacfe.js.map",
+    "787.b2bf7ae4.chunk.js.map": "/buxfer-peek/static/js/787.b2bf7ae4.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.073c9b0a.css",
+    "static/js/main.ef1eacfe.js"
+  ]
+}
